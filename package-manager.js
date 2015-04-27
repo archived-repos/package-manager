@@ -9,7 +9,7 @@ var grunt = require('grunt'),
       'bower': {
         json: ['bower.json', '.bower.json'],
         folder: ['bower_components', '.bower_components']
-      }
+      },
       'npm': {
         json: ['package.json', '.bower.json'],
         folder: ['node_modules']
@@ -97,3 +97,5 @@ PkgManager.prototype.find = function (subset) {
 
   return this.list;
 }
+
+module.exports = PkgManager;
