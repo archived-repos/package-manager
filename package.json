@@ -1,0 +1,24 @@
+{
+  "name": "package-manager",
+  "version": "0.0.1",
+  "description": "package manager library to find and copy dependencies",
+  "main": "package-manager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jstools/package-manager.git"
+  },
+  "keywords": [
+    "nodejs",
+    "bower",
+    "package"
+  ],
+  "author": "Jesús Germade <jesus@germade.es>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jstools/package-manager/issues"
+  },
+  "homepage": "https://github.com/jstools/package-manager"
+}
