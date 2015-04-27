@@ -27,8 +27,8 @@ function _getDependenciesPath (pkgType) {
   }
 
   for( var i = 0, list = typeFiles[pkgType].folders, len = list.length; i < len; i++ ) {
-    if( grunt.file.isDir(cwd, list[i]) ) {
-      return path;
+    if( grunt.file.isDir( cwd, list[i] ) ) {
+      return list[i];
     }
   }
 
@@ -38,10 +38,11 @@ function _getDependenciesPath (pkgType) {
 
 function _getPkgJSON (pkgType, cwd) {
   for( var i = 0, list = typeFiles[pkgType].json, len = list.length; i < len; i++ ) {
-    if( grunt.file.isFile(cwd, list[i]) ) {
-      return grunt.file.readJSON(cwd, list[i]);
+    if( grunt.file.isFile( cwd, list[i] ) ) {
+      return grunt.file.readJSON( path.join(cwd, list[i]) );
     }
   }
+  return;
 }
 
 function _getMainFiles (main) {
@@ -56,13 +57,16 @@ function _getMainFiles (main) {
 
 function _findMainFiles (cwd, subset) {
   var pkgJSON = _getPkgJSON(this.type, cwd),
+      mainList = _getMainFiles(pkgJSON.main),
       dependencies;
 
   if( !pkgJSON ) {
     return;
   }
 
-  this.fileList.concat(_getMainFiles(pkgJSON));
+  for( var i = 0, len = mainList.length ; i < len ; i++ ) {
+    this.fileList.push( path.join(cwd, mainList[i]) );
+  }
 
   if( subset && this.root ) {
     this.root = false;
@@ -78,7 +82,7 @@ function _findMainFiles (cwd, subset) {
   for( var dependence in dependencies ) {
     if( !this.found[dependence] ) {
       this.found[dependence] = dependencies[dependence];
-      _findMainFiles.call( path.join(this.dependenciesPath, dependence) );
+      _findMainFiles.call( this, path.join(this.dependenciesPath, dependence) );
     }
   }
 }
@@ -95,7 +99,7 @@ PkgManager.prototype.find = function (subset) {
 
   _findMainFiles.call(this, '.', subset);
 
-  return this.list;
+  return this.fileList;
 }
 
 module.exports = PkgManager;
