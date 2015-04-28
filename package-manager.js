@@ -95,6 +95,8 @@ function PkgManager (pkgType) {
 }
 
 PkgManager.prototype.find = function (options) {
+  options.cwd = options.cwd || '';
+
   this.found = {};
   this.root = true;
   this.options = options || {};
@@ -102,6 +104,8 @@ PkgManager.prototype.find = function (options) {
   if( !this.fileList || !options.append ) {
     this.fileList = [];
   }
+
+  console.log(this);
 
   _findMainFiles.call(this, this.options.cwd || '.', this.options.src);
 
@@ -114,6 +118,7 @@ PkgManager.prototype.list = function () {
 
 PkgManager.prototype.copy = function (dest, options) {
   options = options || {};
+  options.cwd = options.cwd || '';
 
   var fileList = ( options instanceof Array ) ? options : undefined;
 
