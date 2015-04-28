@@ -56,7 +56,7 @@ function _getMainFiles (main) {
   }
 }
 
-function _findMainFiles (cwd, subset) {
+function _findMainFiles (cwd, src) {
   var pkgJSON = _getPkgJSON(this.type, cwd);
 
   if( !pkgJSON ) {
@@ -70,9 +70,9 @@ function _findMainFiles (cwd, subset) {
     this.fileList.push( path.join(cwd, mainList[i]) );
   }
 
-  if( subset && this.root ) {
+  if( src && this.root ) {
     this.root = false;
-    dependencies = pkgJSON[subset + 'Dependencies'];
+    dependencies = pkgJSON[src];
   } else {
     dependencies = pkgJSON.dependencies;
   }
@@ -103,7 +103,7 @@ PkgManager.prototype.find = function (options) {
     this.fileList = [];
   }
 
-  _findMainFiles.call(this, this.options.cwd || '.', this.options.subset);
+  _findMainFiles.call(this, this.options.cwd || '.', this.options.src);
 
   return this;
 }
@@ -119,7 +119,7 @@ PkgManager.prototype.copy = function (dest, options) {
 
   if( !fileList && !this.fileList ) {
     this.options = this.options || {};
-    extend(this.options, { subset: options.subset, cwd: options.cwd });
+    extend(this.options, { src: options.src, cwd: options.cwd });
     this.find();
     fileList = this.fileList;
   }
