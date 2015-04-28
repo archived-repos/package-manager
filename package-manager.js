@@ -95,10 +95,13 @@ function PkgManager (pkgType) {
 }
 
 PkgManager.prototype.find = function (options) {
-  this.fileList = [];
   this.found = {};
   this.root = true;
   this.options = options || {};
+
+  if( !this.fileList || !options.append ) {
+    this.fileList = [];
+  }
 
   _findMainFiles.call(this, this.options.cwd || '.', this.options.subset);
 
@@ -112,13 +115,16 @@ PkgManager.prototype.list = function () {
 PkgManager.prototype.copy = function (dest, options) {
   options = options || {};
 
-  if( !this.fileList ) {
+  var fileList = ( options instanceof Array ) ? options : undefined;
+
+  if( !fileList && !this.fileList ) {
     this.options = this.options || {};
     extend(this.options, { subset: options.subset, cwd: options.cwd });
     this.find();
+    fileList = this.fileList;
   }
 
-  var expandedList = grunt.file.expand(this.fileList),
+  var expandedList = grunt.file.expand(fileList),
       flatten = options.expand === undefined || !options.expand,
       RE_PKG_BASE = new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/'),
       fileDest;
