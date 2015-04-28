@@ -140,6 +140,72 @@ PkgManager.prototype.copy = function (dest, options) {
   console.log(len, 'files copied');
 }
 
+var RE_EXT = {
+  json: /\.json$/i,
+  yaml: /\.ya?ml$/i
+}
+
+function _parseByType (filePath, text) {
+
+
+  if( RE_EXT.json.test(filePath) ) {
+    return JSON.parse(text);
+  }
+
+  if( RE_EXT.yaml.test(filePath) ) {
+    return require('yamljs').parse(text);
+  }
+
+  return text;
+}
+
+PkgManager.prototype.each = function (file, handler, options) {
+  options = options || {};
+
+  if( file === undefined ) {
+    grunt.fail.warn('required file can not me empty');
+  }
+
+  if( !(handler instanceof Function) ) {
+    grunt.fail.warn('missing loop function');
+  }
+
+  var files, i, len, dependence, fileContent, argsFiles,
+      path = require('path');
+
+  if( typeof file === 'string' ) {
+    files = [file];
+  } else if( file instanceof Array ) {
+    files = file;
+  }
+
+  var pkg = _getPkgJSON(this.type, '.'),
+      srcList = options.src ? ( (options.src instanceof Array) ? options.src : ( typeof options.src === 'string' ? [options.src] : [] ) ) : ['dependencies'],
+      found = {};
+
+  for( i = 0, len = srcList.length ; i < len ; i++ ) {
+    for( dependence in pkg[srcList[i]] ) {
+      found[dependence] = true;
+    }
+  }
+
+  for( dependence in found ) {
+    argsFiles = [dependence];
+    for( i = 0, len = files.length ; i < len ; i++ ) {
+      if( grunt.file.isFile( this.dependenciesPath, dependence, files[i] ) ) {
+        fileContent = grunt.file.read( path.join( this.dependenciesPath, dependence, files[i] ) );
+        if( options.parse === undefined || options.parse ) {
+          fileContent = _parseByType(files[i], fileContent);
+        }
+        argsFiles.push(fileContent);
+      } else {
+        grunt.fail.warn('missing ' + path.join( this.dependenciesPath, dependence, files[i] ) );
+      }
+    }
+    handler.apply(this, argsFiles);
+  }
+};
+
 
 module.exports = function (pkgType) {
   return new PkgManager(pkgType);
