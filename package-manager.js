@@ -110,16 +110,17 @@ PkgManager.prototype.list = function () {
 }
 
 PkgManager.prototype.copy = function (dest, options) {
-
   options = options || {};
 
   if( !this.fileList ) {
-    this.find({ subset: options.subset, cwd: options.cwd });
+    this.options = this.options || {};
+    extend(this.options, { subset: options.subset, cwd: options.cwd });
+    this.find();
   }
 
   var expandedList = grunt.file.expand(this.fileList),
       flatten = options.expand === undefined || !options.expand,
-      RE_PKG_BASE = new RegExp('^' + this.dependenciesPath + '\\/'),
+      RE_PKG_BASE = new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/'),
       fileDest;
 
   for( var i = 0, len = expandedList.length; i < len; i++ ) {
