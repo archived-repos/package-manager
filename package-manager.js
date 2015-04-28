@@ -18,6 +18,7 @@ var grunt = require('grunt'),
 
 function _getDependenciesPath (pkgType) {
 
+
   if( grunt.file.isFile('.' + pkgType + 'rc') ) {
     var rc = grunt.file.readJSON('.' + pkgType + 'rc');
 
@@ -26,8 +27,8 @@ function _getDependenciesPath (pkgType) {
     }
   }
 
-  for( var i = 0, list = typeFiles[pkgType].folders, len = list.length; i < len; i++ ) {
-    if( grunt.file.isDir( cwd, list[i] ) ) {
+  for( var i = 0, list = typeFiles[pkgType].folder || [], len = list.length; i < len; i++ ) {
+    if( grunt.file.isDir( list[i] ) ) {
       return list[i];
     }
   }
@@ -37,7 +38,7 @@ function _getDependenciesPath (pkgType) {
 }
 
 function _getPkgJSON (pkgType, cwd) {
-  for( var i = 0, list = typeFiles[pkgType].json, len = list.length; i < len; i++ ) {
+  for( var i = 0, list = typeFiles[pkgType].json || [], len = list.length; i < len; i++ ) {
     if( grunt.file.isFile( cwd, list[i] ) ) {
       return grunt.file.readJSON( path.join(cwd, list[i]) );
     }
@@ -56,13 +57,14 @@ function _getMainFiles (main) {
 }
 
 function _findMainFiles (cwd, subset) {
-  var pkgJSON = _getPkgJSON(this.type, cwd),
-      mainList = _getMainFiles(pkgJSON.main),
-      dependencies;
+  var pkgJSON = _getPkgJSON(this.type, cwd);
 
   if( !pkgJSON ) {
     return;
   }
+
+  var mainList = _getMainFiles(pkgJSON.main),
+      dependencies;
 
   for( var i = 0, len = mainList.length ; i < len ; i++ ) {
     this.fileList.push( path.join(cwd, mainList[i]) );
@@ -92,14 +94,43 @@ function PkgManager (pkgType) {
   this.dependenciesPath = _getDependenciesPath(pkgType);
 }
 
-PkgManager.prototype.find = function (subset) {
+PkgManager.prototype.find = function (options) {
   this.fileList = [];
   this.found = {};
   this.root = true;
+  this.options = options || {};
 
-  _findMainFiles.call(this, '.', subset);
+  _findMainFiles.call(this, '.', this.options.subset);
 
+  return this;
+}
+
+PkgManager.prototype.list = function () {
   return this.fileList;
 }
 
-module.exports = PkgManager;
+PkgManager.prototype.copy = function (dest, options) {
+
+  if( !this.fileList ) {
+    this.find({ subset: (options || {}).subset });
+  }
+
+  options = options || {};
+
+  var expandedList = grunt.file.expand(this.fileList),
+      flatten = options.expand === undefined || !options.expand,
+      RE_PKG_BASE = new RegExp('^' + this.dependenciesPath + '\\/'),
+      fileDest;
+
+  for( var i = 0, len = expandedList.length; i < len; i++ ) {
+    fileDest = path.join(dest, flatten ? path.basename(expandedList[i]) : expandedList[i].replace(RE_PKG_BASE, '') );
+    grunt.file.write(fileDest, grunt.file.read(expandedList[i]) );
+  }
+
+  console.log(len, 'files copied');
+}
+
+
+module.exports = function (pkgType) {
+  return new PkgManager(pkgType);
+};
