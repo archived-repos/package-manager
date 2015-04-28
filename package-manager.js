@@ -100,7 +100,7 @@ PkgManager.prototype.find = function (options) {
   this.root = true;
   this.options = options || {};
 
-  _findMainFiles.call(this, '.', this.options.subset);
+  _findMainFiles.call(this, this.options.cwd || '.', this.options.subset);
 
   return this;
 }
@@ -111,11 +111,11 @@ PkgManager.prototype.list = function () {
 
 PkgManager.prototype.copy = function (dest, options) {
 
-  if( !this.fileList ) {
-    this.find({ subset: (options || {}).subset });
-  }
-
   options = options || {};
+
+  if( !this.fileList ) {
+    this.find({ subset: options.subset, cwd: options.cwd });
+  }
 
   var expandedList = grunt.file.expand(this.fileList),
       flatten = options.expand === undefined || !options.expand,
