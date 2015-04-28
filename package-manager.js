@@ -14,7 +14,7 @@ var grunt = require('grunt'),
         json: ['package.json', '.bower.json'],
         folder: ['node_modules']
       }
-    };
+    }
 
 function _getDependenciesPath (pkgType) {
 
@@ -28,7 +28,7 @@ function _getDependenciesPath (pkgType) {
   }
 
   for( var i = 0, list = typeFiles[pkgType].folder || [], len = list.length; i < len; i++ ) {
-    if( grunt.file.isDir( list[i] ) ) {
+    if( grunt.file.isDir( process.cwd(), list[i] ) ) {
       return list[i];
     }
   }
@@ -39,8 +39,8 @@ function _getDependenciesPath (pkgType) {
 
 function _getPkgJSON (pkgType, cwd) {
   for( var i = 0, list = typeFiles[pkgType].json || [], len = list.length; i < len; i++ ) {
-    if( grunt.file.isFile( cwd, list[i] ) ) {
-      return grunt.file.readJSON( path.join(cwd, list[i]) );
+    if( grunt.file.isFile( process.cwd(), cwd, list[i] ) ) {
+      return grunt.file.readJSON( path.join(process.cwd(), cwd, list[i]) );
     }
   }
   return;
@@ -95,8 +95,6 @@ function PkgManager (pkgType) {
 }
 
 PkgManager.prototype.find = function (options) {
-  options.cwd = options.cwd || '';
-
   this.found = {};
   this.root = true;
   this.options = options || {};
@@ -104,8 +102,6 @@ PkgManager.prototype.find = function (options) {
   if( !this.fileList || !options.append ) {
     this.fileList = [];
   }
-
-  console.log(this);
 
   _findMainFiles.call(this, this.options.cwd || '.', this.options.src);
 
@@ -118,7 +114,6 @@ PkgManager.prototype.list = function () {
 
 PkgManager.prototype.copy = function (dest, options) {
   options = options || {};
-  options.cwd = options.cwd || '';
 
   var fileList = ( options instanceof Array ) ? options : undefined;
 
@@ -127,12 +122,15 @@ PkgManager.prototype.copy = function (dest, options) {
     extend(this.options, { src: options.src, cwd: options.cwd });
     this.find();
     fileList = this.fileList;
+  } else {
+    fileList = fileList || this.fileList;
   }
 
   var expandedList = grunt.file.expand(fileList),
       flatten = options.expand === undefined || !options.expand,
       RE_PKG_BASE = new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/'),
       fileDest;
+
 
   for( var i = 0, len = expandedList.length; i < len; i++ ) {
     fileDest = path.join(dest, flatten ? path.basename(expandedList[i]) : expandedList[i].replace(RE_PKG_BASE, '') );
