@@ -73,11 +73,12 @@ function _findMainFiles (cwd, src) {
   }
 
   if( src && this.root ) {
-    this.root = false;
     dependencies = pkgJSON[src];
   } else {
     dependencies = pkgJSON.dependencies;
   }
+
+  this.root = false;
 
   if( !dependencies ) {
     return this;
