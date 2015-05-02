@@ -63,11 +63,13 @@ function _findMainFiles (cwd, src) {
     return;
   }
 
-  var mainList = _getMainFiles(pkgJSON.main),
-      dependencies;
+  if( !this.root ) {
+    var mainList = _getMainFiles(pkgJSON.main),
+        dependencies;
 
-  for( var i = 0, len = mainList.length ; i < len ; i++ ) {
-    this.fileList.push( path.join(cwd, mainList[i]) );
+    for( var i = 0, len = mainList.length ; i < len ; i++ ) {
+      this.fileList.push( path.join(cwd, mainList[i]) );
+    }
   }
 
   if( src && this.root ) {
@@ -92,6 +94,7 @@ function _findMainFiles (cwd, src) {
 function PkgManager (pkgType) {
   this.type = pkgType;
   this.dependenciesPath = _getDependenciesPath(pkgType);
+  this.pkg = pkg = _getPkgJSON(pkgType, '.');
 }
 
 PkgManager.prototype.find = function (options) {
@@ -179,12 +182,11 @@ PkgManager.prototype.each = function (file, handler, options) {
     files = file;
   }
 
-  var pkg = _getPkgJSON(this.type, '.'),
-      srcList = options.src ? ( (options.src instanceof Array) ? options.src : ( typeof options.src === 'string' ? [options.src] : [] ) ) : ['dependencies'],
+  var srcList = options.src ? ( (options.src instanceof Array) ? options.src : ( typeof options.src === 'string' ? [options.src] : [] ) ) : ['dependencies'],
       found = {};
 
   for( i = 0, len = srcList.length ; i < len ; i++ ) {
-    for( dependence in pkg[srcList[i]] ) {
+    for( dependence in this.pkg[srcList[i]] ) {
       found[dependence] = true;
     }
   }
