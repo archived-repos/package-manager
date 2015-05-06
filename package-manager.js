@@ -104,7 +104,7 @@ function _findMainFiles (cwd, src) {
 function PkgManager (pkgType) {
   this.type = pkgType;
   this.dependenciesPath = _getDependenciesPath(pkgType);
-  this.pkg = _getPkgJSON(pkgType, '.'),
+  this.pkg = _getPkgJSON(pkgType, '.') || {},
   this.overrides = this.pkg.overrides || {},
   this.extend = this.pkg.extend || {};
 }
