@@ -2,7 +2,8 @@
 
 // task.bower-tmp
 
-var grunt = require('grunt'),
+var _ = require('jstools-utils'),
+    grunt = require('grunt'),
     extend = require('util')._extend,
     path = require('path'),
     typeFiles = {
@@ -14,7 +15,7 @@ var grunt = require('grunt'),
         json: ['package.json', '.bower.json'],
         folder: ['node_modules']
       }
-    }
+    };
 
 function _getDependenciesPath (pkgType) {
 
@@ -63,6 +64,14 @@ function _findMainFiles (cwd, src) {
     return;
   }
 
+  if( this.overrides[pkgJSON.name] ) {
+    _.extend(pkgJSON, this.overrides[pkgJSON.name]);
+  }
+
+  if( this.extend[pkgJSON.name] ) {
+    _.merge(pkgJSON, this.extend[pkgJSON.name]);
+  }
+
   if( !this.root ) {
     var mainList = _getMainFiles(pkgJSON.main),
         dependencies;
@@ -95,7 +104,9 @@ function _findMainFiles (cwd, src) {
 function PkgManager (pkgType) {
   this.type = pkgType;
   this.dependenciesPath = _getDependenciesPath(pkgType);
-  this.pkg = _getPkgJSON(pkgType, '.');
+  this.pkg = _getPkgJSON(pkgType, '.'),
+  this.overrides = this.pkg.overrides || {},
+  this.extend = this.pkg.extend || {};
 }
 
 PkgManager.prototype.find = function (options) {

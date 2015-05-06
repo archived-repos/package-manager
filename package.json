@@ -1,6 +1,6 @@
 {
   "name": "package-manager",
-  "version": "0.0.16",
+  "version": "0.0.20",
   "description": "package manager library to find and copy dependencies",
   "main": "package-manager.js",
   "scripts": {
@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/jstools/package-manager/issues"
   },
-  "homepage": "https://github.com/jstools/package-manager"
+  "homepage": "https://github.com/jstools/package-manager",
+  "dependencies": {
+    "jstools-utils": "0.0.22"
+  }
 }
