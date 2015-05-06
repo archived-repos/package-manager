@@ -100,10 +100,10 @@ function _findMainFiles (cwd, src) {
   }
 }
 
-function PkgManager (pkgType) {
+function PkgManager (pkgType, pkgName) {
   this.type = pkgType;
   this.dependenciesPath = _getDependenciesPath(pkgType);
-  this.pkg = _getPkgJSON(pkgType, '.');
+  this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
   this.overrides = (this.pkg || {}).overrides || {};
   this.extend = (this.pkg || {}).extend || {};
 
@@ -164,7 +164,7 @@ PkgManager.prototype.copy = function (dest, options) {
     grunt.file.write(fileDest, grunt.file.read(expandedList[i]) );
   }
 
-  console.log(len, 'files copied');
+  console.log(len, 'files copied to: ' + dest);
 }
 
 var RE_EXT = {
@@ -236,6 +236,6 @@ PkgManager.prototype.each = function (file, handler, options) {
 };
 
 
-module.exports = function (pkgType) {
-  return new PkgManager(pkgType);
+module.exports = function (pkgType, pkgName) {
+  return new PkgManager(pkgType, pkgName);
 };
