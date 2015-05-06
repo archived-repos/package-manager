@@ -138,6 +138,15 @@ PkgManager.prototype.list = function () {
   return this.fileList;
 }
 
+PkgManager.prototype.excludeDependenciesDir = (function () {
+  var RE_PKG_BASE;
+
+  return function (filePath) {
+    RE_PKG_BASE = RE_PKG_BASE || new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/');
+    return filePath.replace(RE_PKG_BASE, '');
+  };
+})();
+
 PkgManager.prototype.copy = function (dest, options) {
   if(this.error) {
     throw this.error;
@@ -157,12 +166,11 @@ PkgManager.prototype.copy = function (dest, options) {
 
   var expandedList = grunt.file.expand(fileList),
       flatten = options.expand === undefined || !options.expand,
-      RE_PKG_BASE = new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/'),
       fileDest;
 
 
   for( var i = 0, len = expandedList.length; i < len; i++ ) {
-    fileDest = path.join(dest, flatten ? path.basename(expandedList[i]) : expandedList[i].replace(RE_PKG_BASE, '') );
+    fileDest = path.join(dest, flatten ? path.basename(expandedList[i]) : this.excludeDependenciesDir(expandedList[i]) );
     grunt.file.write(fileDest, grunt.file.read(expandedList[i]) );
   }
 
