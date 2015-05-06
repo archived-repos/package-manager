@@ -56,19 +56,21 @@ function _getMainFiles (main) {
   }
 }
 
-function _findMainFiles (cwd, src, pkgJSON) {
+function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
   pkgJSON = pkgJSON || _getPkgJSON(this.type, cwd);
 
   if( !pkgJSON ) {
     return;
   }
 
-  if( this.overrides[pkgJSON.name] ) {
-    _.extend(pkgJSON, this.overrides[pkgJSON.name]);
+  dependenceName = dependenceName || pkgJSON.name;
+
+  if( this.overrides[dependenceName] ) {
+    _.extend(pkgJSON, this.overrides[dependenceName]);
   }
 
-  if( this.extend[pkgJSON.name] ) {
-    _.merge(pkgJSON, this.extend[pkgJSON.name]);
+  if( this.extend[dependenceName] ) {
+    _.merge(pkgJSON, this.extend[dependenceName]);
   }
 
   if( !this.root ) {
@@ -95,7 +97,7 @@ function _findMainFiles (cwd, src, pkgJSON) {
   for( var dependence in dependencies ) {
     if( !this.found[dependence] ) {
       this.found[dependence] = dependencies[dependence];
-      _findMainFiles.call( this, path.join(this.dependenciesPath, dependence) );
+      _findMainFiles.call( this, path.join(this.dependenciesPath, dependence), null, null, dependence );
     }
   }
 }
