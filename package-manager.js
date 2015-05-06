@@ -56,8 +56,8 @@ function _getMainFiles (main) {
   }
 }
 
-function _findMainFiles (cwd, src) {
-  var pkgJSON = _getPkgJSON(this.type, cwd);
+function _findMainFiles (cwd, src, pkgJSON) {
+  pkgJSON = pkgJSON || _getPkgJSON(this.type, cwd);
 
   if( !pkgJSON ) {
     return;
@@ -127,7 +127,7 @@ PkgManager.prototype.find = function (options) {
     this.fileList = [];
   }
 
-  _findMainFiles.call(this, this.options.cwd || '.', this.options.src);
+  _findMainFiles.call(this, this.options.cwd || '.', this.options.src, this.pkg);
 
   return this;
 }
