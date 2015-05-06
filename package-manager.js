@@ -19,7 +19,6 @@ var _ = require('jstools-utils'),
 
 function _getDependenciesPath (pkgType) {
 
-
   if( grunt.file.isFile('.' + pkgType + 'rc') ) {
     var rc = grunt.file.readJSON('.' + pkgType + 'rc');
 
@@ -104,12 +103,22 @@ function _findMainFiles (cwd, src) {
 function PkgManager (pkgType) {
   this.type = pkgType;
   this.dependenciesPath = _getDependenciesPath(pkgType);
-  this.pkg = _getPkgJSON(pkgType, '.') || {},
-  this.overrides = this.pkg.overrides || {},
-  this.extend = this.pkg.extend || {};
+  this.pkg = _getPkgJSON(pkgType, '.');
+  this.overrides = (this.pkg || {}).overrides || {};
+  this.extend = (this.pkg || {}).extend || {};
+
+  if( !this.dependenciesPath ) {
+    this.error = 'missing dependenciesPath';
+  }
+  if( !this.pkg ) {
+    this.error = 'missing package ' + pkgType;
+  }
 }
 
 PkgManager.prototype.find = function (options) {
+  if(this.error) {
+    throw this.error;
+  }
   this.found = {};
   this.root = true;
   this.options = options || {};
@@ -128,6 +137,9 @@ PkgManager.prototype.list = function () {
 }
 
 PkgManager.prototype.copy = function (dest, options) {
+  if(this.error) {
+    throw this.error;
+  }
   options = options || {};
 
   var fileList = ( options instanceof Array ) ? options : undefined;
@@ -175,6 +187,9 @@ function _parseByType (filePath, text) {
 }
 
 PkgManager.prototype.each = function (file, handler, options) {
+  if(this.error) {
+    throw this.error;
+  }
   options = options || {};
 
   if( file === undefined ) {
