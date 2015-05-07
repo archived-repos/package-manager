@@ -144,7 +144,7 @@ PkgManager.prototype.list = function () {
     throw this.error;
   }
 
-  return this.fileList || this.find().fileList;
+  return ( this.fileList || this.find().fileList ).slice();
 }
 
 PkgManager.prototype.mainFiles = function () {
