@@ -104,11 +104,16 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
 
 function PkgManager (pkgType, pkgName) {
   this.type = pkgType;
+  this.pkgName = pkgName;
+
   this.dependenciesPath = _getDependenciesPath(pkgType);
   this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
-  this.overrides = (this.pkg || {}).overrides || {};
-  this.extend = (this.pkg || {}).extend || {};
-  this.pkgName = pkgName;
+
+  var thisPkg = this.pkg || {},
+      rootPkg = _getPkgJSON(pkgType, '.') || {};
+
+  this.overrides = _.extend({}, rootPkg.overrides || {}, thisPkg.overrides || {});
+  this.extend = _.extend({}, rootPkg.extend || {}, thisPkg.extend || {});
 
   if( !this.dependenciesPath ) {
     this.error = 'missing dependenciesPath';
