@@ -1,6 +1,6 @@
 {
   "name": "package-manager",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "package manager library to find and copy dependencies",
   "main": "package-manager.js",
   "scripts": {

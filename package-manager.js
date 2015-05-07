@@ -108,6 +108,7 @@ function PkgManager (pkgType, pkgName) {
   this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
   this.overrides = (this.pkg || {}).overrides || {};
   this.extend = (this.pkg || {}).extend || {};
+  this.pkgName = pkgName;
 
   if( !this.dependenciesPath ) {
     this.error = 'missing dependenciesPath';
@@ -142,11 +143,14 @@ PkgManager.prototype.list = function () {
   return this.fileList || this.find().fileList;
 }
 
-PkgManager.prototype.getMain = function () {
+PkgManager.prototype.mainFiles = function () {
   if(this.error) {
     throw this.error;
   }
-  return _getMainFiles(this.pkg);
+  var _this = this;
+  return _getMainFiles(this.pkg.main).map(function (filePath) {
+    return path.join( _this.dependenciesPath, _this.pkgName, filePath );
+  });
 }
 
 PkgManager.prototype.excludeDependenciesDir = (function () {
