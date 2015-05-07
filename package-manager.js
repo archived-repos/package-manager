@@ -186,7 +186,7 @@ PkgManager.prototype.copy = function (dest, options) {
 
   for( var i = 0, len = expandedList.length; i < len; i++ ) {
     fileDest = path.join(dest, flatten ? path.basename(expandedList[i]) : this.excludeDependenciesDir(expandedList[i]) );
-    grunt.file.write(fileDest, grunt.file.read(expandedList[i]) );
+    grunt.file.copy(expandedList[i], fileDest, { noProcess: true });
   }
 
   console.log(len, 'files copied to: ' + dest);
