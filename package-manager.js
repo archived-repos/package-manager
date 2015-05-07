@@ -138,7 +138,8 @@ PkgManager.prototype.list = function () {
   if(this.error) {
     throw this.error;
   }
-  return this.fileList || this.find();
+
+  return this.fileList || this.find().fileList;
 }
 
 PkgManager.prototype.getMain = function () {
