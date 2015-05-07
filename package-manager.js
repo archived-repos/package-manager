@@ -135,7 +135,17 @@ PkgManager.prototype.find = function (options) {
 }
 
 PkgManager.prototype.list = function () {
-  return this.fileList;
+  if(this.error) {
+    throw this.error;
+  }
+  return this.fileList || this.find();
+}
+
+PkgManager.prototype.getMain = function () {
+  if(this.error) {
+    throw this.error;
+  }
+  return _getMainFiles(this.pkg);
 }
 
 PkgManager.prototype.excludeDependenciesDir = (function () {
@@ -183,7 +193,6 @@ var RE_EXT = {
 }
 
 function _parseByType (filePath, text) {
-
 
   if( RE_EXT.json.test(filePath) ) {
     return JSON.parse(text);
