@@ -109,11 +109,10 @@ function PkgManager (pkgType, pkgName) {
   this.dependenciesPath = _getDependenciesPath(pkgType);
   this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
 
-  var thisPkg = this.pkg || {},
-      rootPkg = _getPkgJSON(pkgType, '.') || {};
+  var thisPkg = this.pkg || {};
 
-  this.overrides = _.extend({}, rootPkg.overrides || {}, thisPkg.overrides || {});
-  this.extend = _.extend({}, rootPkg.extend || {}, thisPkg.extend || {});
+  this.overrides = thisPkg.overrides || {};
+  this.extend = thisPkg.extend || {};
 
   if( !this.dependenciesPath ) {
     this.error = 'missing dependenciesPath';
