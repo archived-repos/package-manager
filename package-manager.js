@@ -95,7 +95,7 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
   }
 
   for( var dependence in dependencies ) {
-    if( !this.found[dependence] ) {
+    if( !this.found[dependence] && !this.ignorePackage[dependence] ) {
       this.found[dependence] = dependencies[dependence];
       _findMainFiles.call( this, path.join(this.dependenciesPath, dependence), null, null, dependence );
     }
@@ -128,13 +128,24 @@ PkgManager.prototype.find = function (options) {
   }
   this.found = {};
   this.root = true;
-  this.options = options || {};
+  options = options || {};
 
   if( !this.fileList || !options.append ) {
     this.fileList = [];
   }
 
-  _findMainFiles.call(this, this.options.cwd || '.', this.options.src, this.pkg);
+  if( options.ignorePackages instanceof Array ) {
+    this.ignorePackage = {};
+    options.ignorePackages.forEach(function (packageName) {
+      this.ignorePackage[packageName] = true;
+    });
+  } else if( options.ignorePackages instanceof Object ) {
+    this.ignorePackage = options.ignorePackages;
+  } else {
+    this.ignorePackage = {};
+  }
+
+  _findMainFiles.call(this, options.cwd || '.', options.src, this.pkg);
 
   return this;
 }
@@ -161,7 +172,7 @@ PkgManager.prototype.excludeDependenciesDir = (function () {
   var RE_PKG_BASE;
 
   return function (filePath) {
-    RE_PKG_BASE = RE_PKG_BASE || new RegExp('^' + path.join(this.options.cwd || '.', this.dependenciesPath).replace(/\//g, '\\/') + '\\/');
+    RE_PKG_BASE = RE_PKG_BASE || new RegExp('^' + this.dependenciesPath.replace(/\//g, '\\/') + '\\/');
     return filePath.replace(RE_PKG_BASE, '');
   };
 })();
@@ -175,9 +186,7 @@ PkgManager.prototype.copy = function (dest, options) {
   var fileList = ( options instanceof Array ) ? options : undefined;
 
   if( !fileList && !this.fileList ) {
-    this.options = this.options || {};
-    extend(this.options, { src: options.src, cwd: options.cwd });
-    this.find();
+    this.find(options);
     fileList = this.fileList;
   } else {
     fileList = fileList || this.fileList;
