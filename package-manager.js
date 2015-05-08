@@ -135,9 +135,10 @@ PkgManager.prototype.find = function (options) {
   }
 
   if( options.ignorePackages instanceof Array ) {
+    var manager = this;
     this.ignorePackage = {};
     options.ignorePackages.forEach(function (packageName) {
-      this.ignorePackage[packageName] = true;
+      manager.ignorePackage[packageName] = true;
     });
   } else if( options.ignorePackages instanceof Object ) {
     this.ignorePackage = options.ignorePackages;
