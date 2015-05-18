@@ -94,8 +94,8 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
 
   for( var dependence in dependencies ) {
     if(
-        ( this.root && this.onlyPackages && this.onlyPackages[dependence] ) ||
-        ( !this.found[dependence] && !this.ignorePackage[dependence] )
+        ( this.root && this.whitelist && this.whitelist[dependence] ) ||
+        ( !this.found[dependence] && !this.blacklist[dependence] )
       ) {
       this.found[dependence] = dependencies[dependence];
       _findMainFiles.call( this, path.join(this.dependenciesPath, dependence), null, null, dependence );
