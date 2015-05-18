@@ -158,10 +158,10 @@ PkgManager.prototype.find = function (options) {
   }
 
   if( options.overrides ) {
-    _extend( finder.overrides, options.overrides );
+    extend( finder.overrides, options.overrides );
   }
   if( options.extend ) {
-    _extend( finder.extend, options.extend );
+    extend( finder.extend, options.extend );
   }
 
   finder.whitelist = _autoMap( options.whitelist || options.onlyPackages );
