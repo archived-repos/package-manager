@@ -153,9 +153,7 @@ PkgManager.prototype.find = function (options) {
   finder.root = true;
   options = options || {};
 
-  if( !finder.fileList || !options.append ) {
-    finder.fileList = [];
-  }
+  finder.fileList = options.append ? this.fileList.slice() : [];
 
   if( options.overrides ) {
     extend( finder.overrides, options.overrides );
@@ -210,7 +208,7 @@ PkgManager.prototype.copy = function (dest, options) {
 
   if( !fileList && !this.fileList ) {
     this.find(options);
-    fileList = this.fileList;
+    fileList = this.find(options).fileList;
   } else {
     fileList = fileList || this.fileList;
   }
