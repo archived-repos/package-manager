@@ -122,7 +122,6 @@ function _autoMap (list) {
 function PkgManager (pkgType, pkgName) {
   this.type = pkgType;
   this.pkgName = pkgName;
-  this.fileList = [];
 
   this.dependenciesPath = _getDependenciesPath(pkgType);
   this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
@@ -154,7 +153,7 @@ PkgManager.prototype.find = function (options) {
   finder.root = true;
   options = options || {};
 
-  finder.fileList = options.append ? this.fileList.slice() : [];
+  finder.fileList = options.append ? ( this.fileList.slice() || []) : [];
 
   if( options.overrides ) {
     extend( finder.overrides, options.overrides );
@@ -205,16 +204,8 @@ PkgManager.prototype.copy = function (dest, options) {
   }
   options = options || {};
 
-  var fileList = ( options instanceof Array ) ? options : undefined;
-
-  if( !fileList && !this.fileList ) {
-    this.find(options);
-    fileList = this.find(options).fileList;
-  } else {
-    fileList = fileList || this.fileList;
-  }
-
-  var expandedList = grunt.file.expand(fileList),
+  var fileList = ( options instanceof Array ) ? options : ( options.fileList || this.fileList || this.find(options).fileList ),
+      expandedList = grunt.file.expand(fileList),
       flatten = options.expand === undefined || !options.expand,
       fileDest;
 
