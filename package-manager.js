@@ -122,6 +122,7 @@ function _autoMap (list) {
 function PkgManager (pkgType, pkgName) {
   this.type = pkgType;
   this.pkgName = pkgName;
+  this.fileList = [];
 
   this.dependenciesPath = _getDependenciesPath(pkgType);
   this.pkg = _getPkgJSON(pkgType, pkgName ? ( path.join(this.dependenciesPath, pkgName) ) : '.');
