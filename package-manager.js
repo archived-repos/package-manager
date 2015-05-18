@@ -4,7 +4,6 @@
 
 var _ = require('jstools-utils'),
     grunt = require('grunt'),
-    extend = require('util')._extend,
     path = require('path'),
     typeFiles = {
       'bower': {
@@ -56,7 +55,7 @@ function _getMainFiles (main) {
   }
 }
 
-function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
+function _findMainFiles (cwd, src, pkgJSON, dependenceName, isRoot) {
   pkgJSON = pkgJSON || _getPkgJSON(this.type, cwd);
 
   if( !pkgJSON ) {
@@ -66,6 +65,7 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
   dependenceName = dependenceName || pkgJSON.name;
 
   if( this.overrides[dependenceName] ) {
+    console.log('overrides', dependenceName, this.overrides[dependenceName] );
     _.extend(pkgJSON, this.overrides[dependenceName]);
   }
 
@@ -73,7 +73,7 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
     _.merge(pkgJSON, this.extend[dependenceName]);
   }
 
-  if( !this.root ) {
+  if( !isRoot ) {
     var mainList = _getMainFiles(pkgJSON.main),
         dependencies;
 
@@ -82,7 +82,7 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
     }
   }
 
-  if( src && this.root ) {
+  if( src && isRoot ) {
     dependencies = pkgJSON[src];
   } else {
     dependencies = pkgJSON.dependencies;
@@ -94,15 +94,13 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
 
   for( var dependence in dependencies ) {
     if(
-        ( this.root && this.whitelist && this.whitelist[dependence] ) ||
+        ( isRoot && this.whitelist && this.whitelist[dependence] ) ||
         ( !this.found[dependence] && !this.blacklist[dependence] )
       ) {
       this.found[dependence] = dependencies[dependence];
       _findMainFiles.call( this, path.join(this.dependenciesPath, dependence), null, null, dependence );
     }
   }
-
-  this.root = false;
 }
 
 function _autoMap (list) {
@@ -150,23 +148,23 @@ PkgManager.prototype.find = function (options) {
   var finder = new PM();
 
   finder.found = {};
-  finder.root = true;
   options = options || {};
 
-  finder.fileList = options.append ? ( this.fileList.slice() || []) : [];
+  if( options.append ) {
+    this.fileList = this.fileList || [];
+  } else {
+    finder.fileList = [];
+  }
 
-  if( options.overrides ) {
-    extend( finder.overrides, options.overrides );
-  }
-  if( options.extend ) {
-    extend( finder.extend, options.extend );
-  }
+  _.extend(finder.overrides, this.overrides, options.overrides, {} );
+  _.extend(finder.extend, this.extend, options.extend, {} );
 
   finder.whitelist = _autoMap( options.whitelist || options.onlyPackages );
-
   finder.blacklist = _autoMap( options.blacklist || options.ignorePackages ) || {};
 
-  _findMainFiles.call(finder, options.cwd || '.', options.src, finder.pkg);
+  _findMainFiles.call(finder, options.cwd || '.', options.src, finder.pkg, true);
+
+  console.log('this\n', finder.overrides );
 
   return finder;
 }
