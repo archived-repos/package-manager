@@ -88,18 +88,35 @@ function _findMainFiles (cwd, src, pkgJSON, dependenceName) {
     dependencies = pkgJSON.dependencies;
   }
 
-  this.root = false;
-
   if( !dependencies ) {
     return this;
   }
 
   for( var dependence in dependencies ) {
-    if( !this.found[dependence] && !this.ignorePackage[dependence] ) {
+    if(
+        ( this.root && this.onlyPackages && this.onlyPackages[dependence] ) ||
+        ( !this.found[dependence] && !this.ignorePackage[dependence] )
+      ) {
       this.found[dependence] = dependencies[dependence];
       _findMainFiles.call( this, path.join(this.dependenciesPath, dependence), null, null, dependence );
     }
   }
+
+  this.root = false;
+}
+
+function _autoMap (list) {
+
+  if( list instanceof Array ) {
+    var map = {};
+
+    list.forEach(function (key) {
+      map[key] = true;
+    });
+    return map;
+  }
+
+  return ( list instanceof Object ) ? list : undefined;
 }
 
 function PkgManager (pkgType, pkgName) {
@@ -126,37 +143,42 @@ PkgManager.prototype.find = function (options) {
   if(this.error) {
     throw this.error;
   }
-  this.found = {};
-  this.root = true;
+
+  var PM = function PkgManager () {};
+  PM.prototype = this;
+
+  var finder = new PM();
+
+  finder.found = {};
+  finder.root = true;
   options = options || {};
 
-  if( !this.fileList || !options.append ) {
-    this.fileList = [];
+  if( !finder.fileList || !options.append ) {
+    finder.fileList = [];
   }
 
-  if( options.ignorePackages instanceof Array ) {
-    var manager = this;
-    this.ignorePackage = {};
-    options.ignorePackages.forEach(function (packageName) {
-      manager.ignorePackage[packageName] = true;
-    });
-  } else if( options.ignorePackages instanceof Object ) {
-    this.ignorePackage = options.ignorePackages;
-  } else {
-    this.ignorePackage = {};
+  if( options.overrides ) {
+    _extend( finder.overrides, options.overrides );
+  }
+  if( options.extend ) {
+    _extend( finder.extend, options.extend );
   }
 
-  _findMainFiles.call(this, options.cwd || '.', options.src, this.pkg);
+  finder.whitelist = _autoMap( options.whitelist || options.onlyPackages );
 
-  return this;
+  finder.blacklist = _autoMap( options.blacklist || options.ignorePackages ) || {};
+
+  _findMainFiles.call(finder, options.cwd || '.', options.src, finder.pkg);
+
+  return finder;
 }
 
-PkgManager.prototype.list = function () {
+PkgManager.prototype.list = function (options) {
   if(this.error) {
     throw this.error;
   }
 
-  return ( this.fileList || this.find().fileList ).slice();
+  return ( this.fileList || this.find(options).fileList ).slice();
 }
 
 PkgManager.prototype.mainFiles = function () {
