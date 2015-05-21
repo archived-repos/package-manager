@@ -162,9 +162,7 @@ PkgManager.prototype.find = function (options) {
   finder.whitelist = _autoMap( options.whitelist || options.onlyPackages );
   finder.blacklist = _autoMap( options.blacklist || options.ignorePackages ) || {};
 
-  _findMainFiles.call(finder, options.cwd || '.', options.src, finder.pkg, true);
-
-  console.log('this\n', finder.overrides );
+  _findMainFiles.call(finder, options.cwd || '.', options.src, finder.pkg, null, true);
 
   return finder;
 }
